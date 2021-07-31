@@ -1,0 +1,31 @@
+---
+dependencies:
+  - p7zip-full
+  - git
+  - docker.io
+  - qemu-guest-agent
+  - spice-vdagent
+go_packages:
+  - github.com/OJ/gobuster/v3@latest 
+  - github.com/ffuf/ffuf
+  - github.com/OWASP/Amass/v3/... 
+    #  - github.com/ambalabanov/cswsh-scanner/...
+  - github.com/hahwul/jwt-hack
+  - github.com/hahwul/dalfox/v2
+  - github.com/jaeles-project/gospider
+    #- github.com/projectdiscovery/nuclei/v2/cmd/nuclei
+git_repos:
+  - git@github.com:danielmiessler/SecLists.git 
+  - git@github.com:esabear/iis_tilde_enum.git
+  - git@github.com:dheiland-r7/snmp
+  - git@github.com:epi052/feroxbuster.git
+  - git@github.com:devanshbatham/ParamSpider.git
+  - git@github.com:SecureAuthCorp/impacket.git
+merlin_version: v1.0.1
+services:
+  - docker
+  - apache2
+  - smbd
+  - spice-vdagent
+docker_images:
+  - byt3bl33d3r/crackmapexec

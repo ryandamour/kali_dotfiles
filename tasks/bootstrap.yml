@@ -1,0 +1,110 @@
+---
+- hosts: localhost
+  environment:
+    PATH: "/usr/local/go/bin:{{ ansible_env.PATH }}"
+  roles:
+     - role: fubarhouse.golang
+       GOPATH: /home/hac/go
+       GOROOT: /usr/local/go
+       go_version: 1.16.6
+       become: true
+  tasks:
+  - name: Update Path
+    blockinfile:
+      dest: /home/hac/.zshrc
+      block: |
+        export GOROOT=/usr/lib/go
+        export GOPATH=$HOME/go
+        export PATH=$GOPATH/bin:$GOROOT/bin:$PATH
+      marker: '# {mark} ANSIBLE MANAGED BLOCKED'
+      insertafter: EOF
+      create: yes
+  - name: Include vars
+    include_vars:
+      dir: ../vars
+  - name: Update packages
+    apt:
+      name: "*"
+      state: latest
+      update_cache: yes
+    become: yes
+  - name: Install depenedencies 
+    apt:
+      name: "{{ dependencies }}" 
+      update_cache: yes
+    become: yes
+  - name: Install go packages
+    shell: go get -u "{{ item }}"
+    with_items:
+      - "{{ go_packages }}"
+  - name: Create directory
+    file:
+      path: /home/hac/Code
+      state: directory
+      mode: 0755
+  - name: Clone / Update repos
+    block:
+    - name: Clone repos
+      shell:
+        chdir: /home/hac/Code
+        cmd: git clone "{{ item }}"
+      with_items:
+        - "{{ git_repos }}"
+    rescue:
+    - name: Update repos
+      shell:
+        chdir: /home/hac/Code
+        cmd: for item in $(ls /home/hac/Code); do cd ${item}; git pull; cd ..; done
+  - name: Stage smb.conf
+    copy:
+      src: ../files/smb.conf
+      dest: /etc/samba/smb.conf
+    become: true
+  - name: Bootstrap services
+    service:
+      name: "{{ item }}"
+      state: restarted
+      enabled: yes
+    become: true
+    with_items:
+      - "{{ services }}"
+  - name: Download KiND
+    get_url:
+      url: https://kind.sigs.k8s.io/dl/v0.11.1/kind-linux-amd64
+      dest: /usr/local/bin/kind
+      mode: 0755
+    become: true
+  - name: Create directory
+    file:
+      path: /var/www/html/PEASS-ng 
+      state: directory
+      mode: 0755
+    become: true
+  - name: Git clone PEASS-ng
+    git:
+      repo: 'https://github.com/carlospolop/PEASS-ng.git'
+      dest: /var/www/html/PEASS-ng
+    become: true
+  - name: Download accesschk.exe
+    unarchive:
+      src: https://download.sysinternals.com/files/AccessChk.zip
+      dest: /var/www/html
+      remote_src: yes
+    become: true
+  - name: Download nc binary
+    get_url:
+      url: https://raw.githubusercontent.com/H74N/netcat-binaries/master/nc
+      dest: /var/www/html/nc
+      mode: 0755
+    become: true
+  - name: Instal docker-py
+    pip:
+      name: docker-py
+      executable: pip3
+    become: true
+  - name: Pull docker images
+    docker_image:
+      name: "{{ item }}"
+    with_items:
+      - "{{ docker_images }}"
+    become: true
