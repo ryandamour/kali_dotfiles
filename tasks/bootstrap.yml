@@ -5,7 +5,7 @@
   roles:
      - role: fubarhouse.golang
        GOPATH: /home/hac/go
-       GOROOT: /usr/local/go
+       GOROOT: /usr/lib/go
        go_version: 1.16.6
        become: true
   tasks:
@@ -74,6 +74,12 @@
       dest: /usr/local/bin/kind
       mode: 0755
     become: true
+  - name: Download kubectl
+    get_url:
+      url: https://dl.k8s.io/release/v1.21.0/bin/linux/amd64/kubectl 
+      dest: /usr/local/bin/kubectl
+      mode: 0755
+    become: true
   - name: Create directory
     file:
       path: /var/www/html/PEASS-ng 
@@ -107,4 +113,9 @@
       name: "{{ item }}"
     with_items:
       - "{{ docker_images }}"
+    become: true
+  - name: Copy registries.conf
+    copy:
+      src: ../files/registries.conf
+      dest: /etc/containers/registries.conf
     become: true

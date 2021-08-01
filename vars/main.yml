@@ -3,8 +3,10 @@ dependencies:
   - p7zip-full
   - git
   - docker.io
+  - podman
   - qemu-guest-agent
   - spice-vdagent
+  - gtar
 go_packages:
   - github.com/OJ/gobuster/v3@latest 
   - github.com/ffuf/ffuf
