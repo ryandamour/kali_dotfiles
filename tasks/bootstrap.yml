@@ -9,6 +9,19 @@
        go_version: 1.16.6
        become: true
   tasks:
+  - name: Import the signing key for the Neo Technology Debian repository for Neo4j
+    apt_key:
+      url: https://debian.neo4j.org/neotechnology.gpg.key
+      state: present
+    become: true
+
+  - name: Add the Neo Technology Debian repository for Neo4j
+    apt_repository:
+      repo: "deb https://debian.neo4j.com stable {% if neo4j_version is defined %}{{ neo4j_version.split('.')[0:2] | join('.') }}{% else %}latest{% endif %}"
+      state: present
+      update_cache: true
+    become: true
+
   - name: Update Path
     blockinfile:
       dest: /home/hac/.zshrc
@@ -97,11 +110,71 @@
       dest: /var/www/html
       remote_src: yes
     become: true
+  - name: Create directory
+    file:
+      path: /var/www/html/PowerUpSQL
+      state: directory
+      mode: 0755
+    become: true
+  - name: Git clone powerupsql
+    git:
+      repo: "https://github.com/NetSPI/PowerUpSQL.git"
+      dest: /var/www/html/PowerUpSQL
+    become: true
   - name: Download nc binary
     get_url:
       url: https://raw.githubusercontent.com/H74N/netcat-binaries/master/nc
       dest: /var/www/html/nc
       mode: 0755
+    become: true
+  - name: Download nc.exe
+    get_url:
+      url: https://github.com/int0x33/nc.exe/raw/master/nc.exe
+      dest: /var/www/html/nc.exe
+      mode: 0755
+    become: true
+  - name: Create directory
+    file:
+      path: /opt/merlin 
+      state: directory
+      owner: hac
+      group: hac
+      mode: 0755
+    become: true
+  - name: Download merlin
+    get_url:
+      url: https://github.com/Ne0nd0g/merlin/releases/latest/download/merlinServer-Linux-x64.7z 
+      dest: /opt/merlin/merlinServer-Linux-x64.7z
+      mode: 0755
+  - name: Extract Merlin
+    shell: 
+      cmd: 7z x -pmerlin merlinServer-Linux-x64.7z 
+      chdir: /opt/merlin
+    ignore_errors: true 
+  - name: Install Sharphound
+    get_url:
+      url: https://github.com/BloodHoundAD/BloodHound/raw/master/Collectors/SharpHound.exe
+      dest: /var/www/html/SharpHound.exe
+    become: true
+  - name: Download Rubeus
+    get_url:
+      url: https://github.com/r3motecontrol/Ghostpack-CompiledBinaries/raw/master/Rubeus.exe 
+      dest: /var/www/html
+    become: true 
+  - name: Download socat
+    get_url:
+      url: https://github.com/andrew-d/static-binaries/raw/master/binaries/linux/x86_64/socat
+      dest: /var/www/html
+    become: true
+  - name: Download socat.exe
+    get_url:
+      url: https://github.com/tech128/socat-1.7.3.0-windows/raw/master/socat.exe
+      dest: /var/www/html
+    become: true
+  - name: Download plink.exe
+    get_url:
+      url: https://the.earth.li/~sgtatham/putty/latest/w64/plink.exe
+      dest: /var/www/html
     become: true
   - name: Instal docker-py
     pip:
@@ -118,4 +191,9 @@
     copy:
       src: ../files/registries.conf
       dest: /etc/containers/registries.conf
+    become: true
+  - name: Set Neo4j initial password
+    command: "neo4j-admin set-initial-password admin"
+    args:
+      creates: /var/lib/neo4j/data/dbms/auth.ini
     become: true

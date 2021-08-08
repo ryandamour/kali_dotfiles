@@ -6,7 +6,7 @@ dependencies:
   - podman
   - qemu-guest-agent
   - spice-vdagent
-  - gtar
+  - neo4j
 go_packages:
   - github.com/OJ/gobuster/v3@latest 
   - github.com/ffuf/ffuf
@@ -16,6 +16,7 @@ go_packages:
   - github.com/hahwul/dalfox/v2
   - github.com/jaeles-project/gospider
     #- github.com/projectdiscovery/nuclei/v2/cmd/nuclei
+  - github.com/Ne0nd0g/merlin-agent
 git_repos:
   - git@github.com:danielmiessler/SecLists.git 
   - git@github.com:esabear/iis_tilde_enum.git
@@ -23,11 +24,13 @@ git_repos:
   - git@github.com:epi052/feroxbuster.git
   - git@github.com:devanshbatham/ParamSpider.git
   - git@github.com:SecureAuthCorp/impacket.git
+  - git@github.com:lgandx/Responder.git
 merlin_version: v1.0.1
 services:
   - docker
   - apache2
   - smbd
   - spice-vdagent
+  - neo4j
 docker_images:
   - byt3bl33d3r/crackmapexec
